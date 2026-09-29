@@ -1,0 +1,32 @@
+{
+  "name": "hyperdrive-mesh",
+  "version": "1.0.0",
+  "description": "Headless P2P Storage Engine & MCP Server extracted from the Beaker/Hypercore ecosystem",
+  "main": "src/index.mjs",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/test_core_drive.mjs",
+    "test:p2p": "node tests/test_p2p_replication.mjs",
+    "start": "node src/index.mjs"
+  },
+  "keywords": [
+    "hypercore",
+    "hyperdrive",
+    "hyperswarm",
+    "p2p",
+    "local-first",
+    "mcp",
+    "agentic-ai",
+    "decentralized"
+  ],
+  "author": "Diamantenschmiede & Wolfsrudel",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
+    "b4a": "^1.6.7",
+    "corestore": "^7.12.6",
+    "hyperdrive": "^13.3.4",
+    "hyperswarm": "^4.17.2",
+    "random-access-memory": "^6.2.1"
+  }
+}
