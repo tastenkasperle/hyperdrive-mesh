@@ -4,6 +4,13 @@
   "description": "Headless P2P Storage Engine & MCP Server extracted from the Beaker/Hypercore ecosystem",
   "main": "src/index.mjs",
   "type": "module",
+  "bin": {
+    "hyperdrive-mesh": "src/cli/index.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tastenkasperle/hyperdrive-mesh.git"
+  },
   "scripts": {
     "test": "node tests/test_core_drive.mjs",
     "test:p2p": "node tests/test_p2p_replication.mjs",
