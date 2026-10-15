@@ -1,0 +1,7 @@
+tests/
+SAVEGAME*.md
+raptor_audit_report.json
+.storage/
+.storage_*/
+*.log
+.env
