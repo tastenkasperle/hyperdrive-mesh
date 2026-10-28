@@ -139,7 +139,8 @@ export class MeshMCPServer {
       try {
         switch (name) {
           case 'p2p_drive_create': {
-            const driveName = args.name || 'default'
+            const rawName = String(args?.name || 'default').trim()
+            const driveName = rawName.replace(/[^a-zA-Z0-9_-]/g, '_') || 'default'
             const storePath = path.join(this.storageDir, driveName)
             const store = initStorage(storePath)
             const drive = new MeshDrive(store)
@@ -166,7 +167,10 @@ export class MeshMCPServer {
           }
 
           case 'p2p_drive_connect': {
-            const targetKey = args.key.trim().toLowerCase()
+            const targetKey = String(args?.key || '').trim().toLowerCase()
+            if (!/^[0-9a-f]{64}$/.test(targetKey)) {
+              throw new Error('Ungültiger Hyperdrive Public Key: Erwartet wird ein 64-stelliger hexadezimaler Key.')
+            }
             if (this.activeDrives.has(targetKey)) {
               return {
                 content: [{ type: 'text', text: JSON.stringify({ status: 'already_connected', key: targetKey }) }]

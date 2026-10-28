@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "hyperdrive-mesh",
+  "version": "1.0.0",
+  "description": "Serverless P2P File System & Decentralized Memory Mesh for Autonomous AI Agents",
+  "author": {
+    "name": "Diamantenschmiede",
+    "url": "https://github.com/tastenkasperle"
+  },
+  "homepage": "https://github.com/tastenkasperle/hyperdrive-mesh",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tastenkasperle/hyperdrive-mesh.git"
+  },
+  "capabilities": {
+    "tools": true
+  },
+  "transport": {
+    "type": "stdio",
+    "command": "node",
+    "args": [
+      "src/index.mjs"
+    ]
+  }
+}

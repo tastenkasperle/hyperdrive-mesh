@@ -4,6 +4,8 @@
  * Exfiltrationsversuche, Bidi-Spoofing und unautorisierte Pfade.
  */
 
+import path from 'path'
+
 // Erweiterte Injection-Muster nach OWASP GenAI 2026
 const INJECTION_PATTERNS = [
   /ignore\s+(all\s+)?(previous|prior|above)\s+(instructions|prompts|directives)/i,
@@ -98,12 +100,32 @@ export class SecurityGuard {
   }
 
   /**
+   * Normalisiert virtuelle Pfade exakt synchron zu MeshDrive.sanitizePath,
+   * damit Traversal-Bypässe ("system/cfg", "/a/../system/cfg") vor der Autorisierung abgefangen werden.
+   * @param {string} p
+   * @returns {string}
+   */
+  static normalizeVirtualPath(p) {
+    if (!p || typeof p !== 'string') return '/'
+    let clean = p.replace(/[\0\r\n\t]/g, '').trim().replace(/\\/g, '/')
+    clean = clean.replace(/^[a-zA-Z]:/, '')
+    clean = path.posix.normalize('/' + clean)
+    const segments = clean.split('/').filter(s => {
+      const trimmed = s.trim()
+      return trimmed.length > 0 && !/^\.+$/.test(trimmed)
+    })
+    return '/' + segments.join('/')
+  }
+
+  /**
    * Prüft Pfad-Berechtigungen (Capability-Based Access Control)
    * @param {string} filePath 
    * @param {string} agentRole ('admin' | 'worker' | 'guest')
    * @param {'read' | 'write'} action 
    */
   static authorize(filePath, agentRole = 'worker', action = 'write') {
+    const cleanPath = SecurityGuard.normalizeVirtualPath(filePath)
+
     // Nur exakt 'admin' besitzt Root-Rechte
     const isAdmin = agentRole === 'admin'
 
@@ -112,17 +134,17 @@ export class SecurityGuard {
       return { allowed: false, reason: 'Guest agents are read-only.' }
     }
 
-    // System-Pfade sind strikt Admin-Only
-    if (filePath.startsWith('/system/') && !isAdmin && action === 'write') {
+    // System-Pfade sind strikt Admin-Only (geprüft auf kanonischem Pfad!)
+    if ((cleanPath === '/system' || cleanPath.startsWith('/system/')) && !isAdmin && action === 'write') {
       return { allowed: false, reason: 'System paths are write-protected (Admin only).' }
     }
 
     // Credential- & Secret-Dateien sind für Nicht-Admins komplett gesperrt
     for (const pattern of SENSITIVE_PATH_PATTERNS) {
-      if (pattern.test(filePath) && !isAdmin) {
+      if ((pattern.test(filePath) || pattern.test(cleanPath)) && !isAdmin) {
         return { 
           allowed: false, 
-          reason: `Access to sensitive path "${filePath}" blocked for role "${agentRole}".` 
+          reason: `Access to sensitive path "${cleanPath}" blocked for role "${agentRole}".` 
         }
       }
     }

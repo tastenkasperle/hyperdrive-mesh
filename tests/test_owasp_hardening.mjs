@@ -39,7 +39,18 @@ async function testOWASPHardening() {
     const auth = SecurityGuard.authorize(p, 'worker', 'read')
     assert.strictEqual(auth.allowed, false, `Pfad ${p} muss für Worker gesperrt sein`)
   }
-  console.log('  ✔️ Alle 4 sensiblen Secret-Pfade erfolgreich vor Worker-Agenten isoliert.')
+  // 5. System-Path Normalization Bypass Check
+  const systemBypassAttempts = [
+    'system/kernel.sys',
+    '//system/kernel.sys',
+    '/public/../system/config.json',
+    '\\system\\boot.ini'
+  ]
+  for (const sysPath of systemBypassAttempts) {
+    const sysAuth = SecurityGuard.authorize(sysPath, 'worker', 'write')
+    assert.strictEqual(sysAuth.allowed, false, `System-Bypass-Pfad ${sysPath} muss blockiert werden`)
+  }
+  console.log('  ✔️ Alle 4 sensiblen Secret-Pfade & System-Bypässe erfolgreich vor Worker-Agenten isoliert.')
 
   console.log('\n🎉 [TEST 6 ERFOLGREICH] Alle OWASP 2026 Schutzschilde schlagen verlässlich an!\n')
 }
